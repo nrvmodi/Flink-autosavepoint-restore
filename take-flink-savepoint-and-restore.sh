@@ -1,20 +1,23 @@
 
 #!/bin/bash
 
+flinkBucketPath=s3://niravmodi-test-bucket/savepoint/quota
+flinkWebUiUrl=http://flink.web.internal/jobs/overview
+
 echo 'Fetching Jobs'
 
-curl http://flink.web.internal/jobs/overview | jq '.[]' > response.json
+curl $flinkWebUiUrl | jq '.[]' > response.json
 
 echo 'Fetched Jobs'
 
 jobmanagerPod=$(kubectl get pods | grep jobmanager | awk '{print $1}')
 
 echo 'Flink Job Manager Pod: '$jobmanagerPod
-jid=$(jq --raw-output '.[] | select(.name=="quota" and .state == "RUNNING") | .jid' response.json)
+jid=$(jq --raw-output '.[] | select(.name=="<<Replace-job-name>>" and .state == "RUNNING") | .jid' response.json)
 
 echo 'Flink Job Manager Job Id: '$jid
 
-savepointPathValue=$(kubectl exec $jobmanagerPod flink savepoint $jid s3://ray-flink-recovery-prod/savepoint/quota | grep s3 | awk '{print $4}')
+savepointPathValue=$(kubectl exec $jobmanagerPod flink savepoint $jid $flinkBucketPath | grep s3 | awk '{print $4}')
 echo 'Savepoint Path: '${savepointPathValue}
 
 # sample value for your variables
