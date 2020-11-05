@@ -13,7 +13,7 @@ echo 'Fetched Jobs'
 jobmanagerPod=$(kubectl get pods | grep jobmanager | awk '{print $1}')
 
 echo 'Flink Job Manager Pod: '$jobmanagerPod
-jid=$(jq --raw-output '.[] | select(.name=="<<Replace-job-name>>" and .state == "RUNNING") | .jid' response.json)
+jid=$(jq --raw-output '.[] | select(.name=="<<Replace_job_name>>" and .state == "RUNNING") | .jid' response.json)
 
 echo 'Flink Job Manager Job Id: '$jid
 
