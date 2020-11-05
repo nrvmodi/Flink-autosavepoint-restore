@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flink-test-job
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flink
+      component: flink-test-job
+  template:
+    metadata:
+      labels:
+        app: flink
+        component: flink-test-job
+    spec:
+      imagePullSecrets:
+        -   name: regcred     
+      containers:
+      - name: flink-test-job
+        image: nrvmodi/flink-test-job:8.0.10-SNAPSHOT
+        command: ["/bin/bash", "-c"]
+        args: 
+          - flink run -m flink-jobmanager:8081 -p 12 -s {{SAVEPOINT}} -c com.nirav.job.TestJob /opt/flink/app.jar --inputTopic test.input --outputTopic test.output --groupId quotaGroup --bootstrapServers kafka:9092 --checkpointDir s3://niravmodi-test-bucket/checkpoint/quota --jaasEnabled true
